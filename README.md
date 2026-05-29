@@ -1,6 +1,6 @@
 # PaintLearning - AI绘画教学助手
 
-一款基于人工智能技术的移动应用，帮助绘画爱好者通过分析经典名作来学习绘画技巧。
+一款基于人工智能技术的绘画学习平台，帮助绘画爱好者通过分析经典名作来学习绘画技巧。
 
 ## 📱 功能特点
 
@@ -28,140 +28,329 @@
 - 学习数据统计分析
 - 历史记录快速回顾
 
-## 🛠️ 技术栈
+## 🏗️ 技术架构
 
-| 技术 | 说明 |
-|------|------|
-| **Expo** | 跨平台应用开发框架 |
-| **React Native** | 原生移动应用开发 |
-| **TypeScript** | 类型安全的开发体验 |
-| **React Native Paper** | Material Design UI组件库 |
-| **React Navigation** | 灵活的导航系统 |
-| **Zustand** | 轻量级状态管理 |
-| **AsyncStorage** | 本地数据持久化 |
+### 三层微服务架构
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     Vue3 前端层                               │
+│  (Pinia 状态管理 + Vue Router + Element Plus)                 │
+└────────────────────────────┬────────────────────────────────────┘
+                             │ REST API
+┌────────────────────────────▼────────────────────────────────────┐
+│                    .NET Core 服务层                          │
+│  (AI服务集成 + 业务编排 + API网关)                           │
+└────────────────────────────┬────────────────────────────────────┘
+                             │ REST API
+┌────────────────────────────▼────────────────────────────────────┐
+│                  Spring Boot 后端                            │
+│  (数据持久化 + 业务逻辑 + REST API)                          │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 技术栈
+
+| 层级 | 技术 | 说明 |
+|------|------|------|
+| **前端** | Vue 3 | 渐进式JavaScript框架 |
+| | Pinia | 官方状态管理库 |
+| | Vue Router | 官方路由管理 |
+| | Element Plus | UI组件库 |
+| | Vite | 快速构建工具 |
+| **服务层** | C# / .NET 8 | 高性能跨平台框架 |
+| | ASP.NET Core | Web API框架 |
+| | HttpClient | HTTP请求处理 |
+| **后端** | Java 17 | 企业级开发语言 |
+| | Spring Boot 3.2 | 快速应用框架 |
+| | Spring Data JPA | 数据访问层 |
+| | MySQL / H2 | 数据库 |
+
+### AI服务支持
+
+| AI模型 | 状态 | 说明 |
+|--------|------|------|
+| OpenAI (GPT-4o) | ✅ 已实现 | 支持图像分析 |
+| Claude (Claude 3) | ✅ 已实现 | 支持图像分析 |
+| Gemini (Gemini Pro) | ✅ 已实现 | 支持图像分析 |
 
 ## 🚀 快速开始
 
 ### 环境要求
-- Node.js 18+
-- npm 或 yarn
-- Expo CLI
 
-### 安装依赖
+- **前端**: Node.js 20+, npm/yarn
+- **服务层**: .NET 8 SDK
+- **后端**: JDK 17+, Maven 3.8+
+- **数据库**: MySQL 8.0+ (可选，开发环境使用H2)
+
+### 安装与运行
+
+#### 1. 后端服务 (Java Spring Boot)
 
 ```bash
-# 克隆项目后，进入项目目录
-cd paintlearning
+cd backend
+
+# 使用 Maven 构建
+mvn clean package
+
+# 运行应用 (开发环境 - H2内存数据库)
+mvn spring-boot:run
+
+# 或运行打包后的JAR
+java -jar target/paintlearning-backend-1.0.0.jar
+
+# 生产环境 (MySQL)
+java -jar target/paintlearning-backend-1.0.0.jar --spring.profiles.active=mysql
+```
+
+后端服务默认运行在: http://localhost:8080
+
+#### 2. 服务层 (.NET Core)
+
+```bash
+cd service
+
+# 还原依赖
+dotnet restore
+
+# 运行应用
+dotnet run
+
+# 或发布并运行
+dotnet publish -c Release
+dotnet run --project bin/Release/net8.0/PaintLearning.Service.dll
+```
+
+服务层默认运行在: http://localhost:5000
+
+#### 3. 前端 (Vue 3)
+
+```bash
+cd frontend
 
 # 安装依赖
 npm install
 
-# 安装web支持（可选）
-npx expo install react-dom react-native-web
+# 开发模式
+npm run dev
+
+# 生产构建
+npm run build
+
+# 预览生产构建
+npm run preview
 ```
 
-### 运行项目
+前端默认运行在: http://localhost:5173
+
+### Docker部署 (可选)
 
 ```bash
-# 启动开发服务器
-npm start
+# 构建所有服务镜像
+docker-compose build
 
-# 运行Web版本
-npm run web
-
-# 运行Android版本
-npm run android
-
-# 运行iOS版本（需要Mac）
-npm run ios
+# 启动所有服务
+docker-compose up -d
 ```
-
-### 配置API Key
-
-首次使用前，需要在应用的「设置」页面中配置AI模型的API Key：
-
-1. 打开应用，进入「设置」
-2. 选择AI模型（当前支持OpenAI GPT-4o）
-3. 输入您的API Key
-4. 点击「保存API Key」
-
-> ⚠️ **注意**：AI功能需要消耗API配额，请合理使用。
 
 ## 📁 项目结构
 
 ```
 PaintLearning/
-├── App.tsx                    # 应用入口和导航配置
-├── index.ts                   # Expo启动文件
-├── src/
-│   ├── screens/              # 页面组件
-│   │   ├── HomeScreen.tsx    # 首页
-│   │   ├── AnalysisScreen.tsx# 分析页面
-│   │   ├── TutorialScreen.tsx# 教程页面
-│   │   ├── PracticeScreen.tsx# 练习页面
-│   │   ├── HistoryScreen.tsx # 历史页面
-│   │   └── SettingsScreen.tsx# 设置页面
-│   ├── services/              # 服务层
-│   │   └── AIService.ts       # AI服务适配器
-│   ├── store/                 # 状态管理
-│   │   └── index.ts           # Zustand Store
-│   ├── types/                 # 类型定义
-│   │   └── index.ts           # TypeScript类型
-│   └── utils/                 # 工具函数
-│       ├── image.ts           # 图片处理
-│       └── theme.ts           # 主题配置
-├── assets/                    # 静态资源
-├── app.json                   # Expo配置
-└── package.json               # 依赖配置
+├── backend/                    # Java Spring Boot 后端
+│   ├── src/main/java/com/paintlearning/app/
+│   │   ├── controller/        # REST API控制器
+│   │   │   ├── ArtworkController.java
+│   │   │   └── AISettingsController.java
+│   │   ├── service/          # 业务逻辑层
+│   │   │   ├── ArtworkService.java
+│   │   │   └── AISettingsService.java
+│   │   ├── repository/        # 数据访问层
+│   │   ├── entity/           # JPA实体类
+│   │   │   ├── Artwork.java
+│   │   │   ├── AnalysisResult.java
+│   │   │   ├── Tutorial.java
+│   │   │   └── Practice.java
+│   │   ├── dto/              # 数据传输对象
+│   │   ├── config/           # 配置类
+│   │   └── exception/        # 异常处理
+│   ├── src/main/resources/
+│   │   └── application.yml   # 应用配置
+│   └── pom.xml               # Maven依赖
+│
+├── service/                    # C# .NET Core 服务层
+│   ├── Controllers/          # API控制器
+│   │   ├── ArtworkController.cs
+│   │   └── AISettingsController.cs
+│   ├── Services/             # 服务类
+│   │   ├── AIService.cs      # AI服务实现
+│   │   └── ArtworkServiceClient.cs
+│   ├── DTO/                  # 数据传输对象
+│   ├── Program.cs            # 启动类
+│   └── PaintLearning.Service.csproj
+│
+├── frontend/                   # Vue3 前端
+│   ├── src/
+│   │   ├── views/            # 页面组件
+│   │   │   ├── Home.vue      # 首页
+│   │   │   ├── Analysis.vue  # 分析页面
+│   │   │   ├── Tutorial.vue  # 教程页面
+│   │   │   ├── Practice.vue  # 练习页面
+│   │   │   ├── History.vue   # 历史页面
+│   │   │   └── Settings.vue  # 设置页面
+│   │   ├── components/       # 公共组件
+│   │   │   └── BottomNav.vue
+│   │   ├── stores/           # Pinia状态管理
+│   │   │   └── app.ts
+│   │   ├── api/              # API服务
+│   │   │   └── index.ts
+│   │   ├── router/           # 路由配置
+│   │   │   └── index.ts
+│   │   ├── types/            # TypeScript类型
+│   │   │   └── index.ts
+│   │   ├── App.vue           # 根组件
+│   │   └── main.ts           # 入口文件
+│   ├── index.html
+│   ├── vite.config.ts
+│   └── package.json
+│
+├── src/                       # 原React Native项目(保留)
+├── assets/                     # 静态资源
+├── MIGRATION_DOCUMENT.md      # 迁移文档
+└── README.md                   # 项目文档
 ```
 
-## 🎯 核心模块
+## ⚙️ 配置说明
 
-### 状态管理 (Zustand)
-应用使用Zustand进行状态管理，支持：
-- 画作数据的增删改查
-- 收藏状态管理
-- AI设置持久化
-- 数据自动保存到本地
+### 后端配置 (backend/src/main/resources/application.yml)
 
-### AI服务架构
-采用适配器模式设计，支持多种AI模型：
-- **OpenAI** (GPT-4o) - ✅ 已实现
-- **Claude** - 🔜 待实现
-- **Gemini** - 🔜 待实现
+```yaml
+server:
+  port: 8080
 
-### 图片处理
-- 自动压缩图片（最大1024px）
-- Base64编码用于API传输
-- 保留原始图片URI用于本地显示
+spring:
+  datasource:
+    url: jdbc:h2:mem:paintlearning
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+  h2:
+    console:
+      enabled: true
 
-## 🌐 多语言支持
+# 生产环境MySQL配置
+# spring:
+#   datasource:
+#     url: jdbc:mysql://localhost:3306/paintlearning
+#     username: root
+#     password: your_password
+```
+
+### 服务层配置 (service/appsettings.json)
+
+```json
+{
+  "BackendApi": {
+    "BaseUrl": "http://localhost:8080"
+  },
+  "AI": {
+    "DefaultModel": "openai"
+  }
+}
+```
+
+### 前端配置 (frontend/src/api/index.ts)
+
+```typescript
+const API_BASE_URL = 'http://localhost:5000'
+```
+
+## 🔌 API接口
+
+### 画作管理
+
+| 接口 | 方法 | 路径 | 说明 |
+|------|------|------|------|
+| 获取所有画作 | GET | `/api/artworks` | 获取用户的所有画作 |
+| 获取画作详情 | GET | `/api/artworks/{id}` | 根据ID获取画作详情 |
+| 创建画作 | POST | `/api/artworks` | 创建新画作 |
+| 更新画作 | PUT | `/api/artworks/{id}` | 更新画作信息 |
+| 删除画作 | DELETE | `/api/artworks/{id}` | 删除画作 |
+| 收藏/取消收藏 | POST | `/api/artworks/{id}/favorite` | 切换收藏状态 |
+
+### AI分析
+
+| 接口 | 方法 | 路径 | 说明 |
+|------|------|------|------|
+| 分析画作 | POST | `/api/artworks/{id}/analyze` | AI分析画作 |
+| 生成教程 | POST | `/api/artworks/{id}/tutorial` | 生成绘画教程 |
+| 练习反馈 | POST | `/api/artworks/practice` | 提交练习并获取反馈 |
+
+### AI设置
+
+| 接口 | 方法 | 路径 | 说明 |
+|------|------|------|------|
+| 获取设置 | GET | `/api/ai-settings` | 获取AI配置 |
+| 更新设置 | PUT | `/api/ai-settings` | 更新AI配置 |
+
+## 🌍 多语言支持
 
 应用支持多种界面语言：
 - 🇨🇳 简体中文
 - 🇺🇸 English
 - 🇯🇵 日本語
+- 🇰🇷 한국어
 
 AI分析结果的语言将跟随界面语言设置。
 
+## 📊 数据库设计
+
+### 核心数据表
+
+**artworks** - 画作表
+- id (VARCHAR) - 主键
+- image_uri (VARCHAR) - 图片URI
+- thumbnail_uri (VARCHAR) - 缩略图URI
+- analysis_id (VARCHAR) - 分析结果ID
+- tutorial_id (VARCHAR) - 教程ID
+- created_at (DATETIME) - 创建时间
+- is_favorite (BOOLEAN) - 是否收藏
+
+**analysis_results** - 分析结果表
+- id (VARCHAR) - 主键
+- composition_id (VARCHAR) - 构图分析ID
+- color_id (VARCHAR) - 配色分析ID
+- technique_id (VARCHAR) - 技法分析ID
+- style_id (VARCHAR) - 风格分析ID
+- light_shadow_id (VARCHAR) - 光影分析ID
+- overall_summary (TEXT) - 总体评价
+
 ## 🔮 未来计划
 
-- [ ] 实现Claude和Gemini适配器
-- [ ] 添加更多分析维度
-- [ ] 支持社交分享功能
+- [ ] 添加用户认证系统
+- [ ] 实现社交分享功能
 - [ ] 添加绘画社区
 - [ ] 离线模式支持
+- [ ] 性能优化与缓存
+- [ ] 单元测试与集成测试
 
 ## 📄 许可证
 
-本项目仅供学习交流使用。
+本项目采用 MIT 许可证。
 
 ## 🙏 致谢
 
-- [Expo](https://expo.dev/) - 优秀的跨平台开发框架
-- [React Native Paper](https://reactnativepaper.com/) - 精美的Material Design组件
-- [Zustand](https://github.com/pmndrs/zustand) - 简洁的状态管理方案
-- OpenAI - 提供强大的AI能力
+- [Spring Boot](https://spring.io/projects/spring-boot) - 快速应用开发框架
+- [.NET](https://dotnet.microsoft.com/) - 高性能开发平台
+- [Vue.js](https://vuejs.org/) - 渐进式JavaScript框架
+- [Element Plus](https://element-plus.org/) - Vue 3 UI组件库
+- [OpenAI](https://openai.com/) - 提供强大的AI能力
+- [Anthropic](https://anthropic.com/) - Claude AI服务
+- [Google](https://deepmind.google/gemini) - Gemini AI服务
 
 ---
 
